@@ -16,9 +16,14 @@ electron.contextBridge.exposeInMainWorld("electron", {
     ipcSend("sendFrameAction", payload);
   },
 
-  startOverlay: () => ipcSend("startOverlay", null),
+  startOverlay: () => ipcSend("startOverlay", undefined),
+  closeOverlay: () => ipcSend("closeOverlay", undefined),
+  toggleOverlay: () => ipcSend("toggleOverlay", undefined),
   openExternalLink: (url) => ipcSend("openExternalLink", url),
   openHudsDirectory: () => ipcSend("openHudsDirectory", undefined),
+  getDisplays: () => ipcInvoke("getDisplays"),
+  moveHudToDisplay: (displayIndex) => ipcSend("moveHudToDisplay", displayIndex),
+  getHudStatus: () => ipcInvoke("getHudStatus"),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(

@@ -4,7 +4,7 @@ import {
   ipcMainOn,
   openHudsDirectory,
 } from "../helpers/index.js";
-import { createHudWindow } from "../hudWindow.js";
+import { createHudWindow, getHudWindow, closeHudWindow, moveHudToDisplay, getAvailableDisplays, getHudStatus } from "../hudWindow.js";
 import { getPlayers } from "../server/services/index.js";
 // Handle expects a response
 export function ipcMainEvents(mainWindow: BrowserWindow) {
@@ -38,11 +38,42 @@ export function ipcMainEvents(mainWindow: BrowserWindow) {
     hudWindow.show();
   });
 
+  ipcMainOn("closeOverlay", () => {
+    closeHudWindow();
+  });
+
+  ipcMainOn("toggleOverlay", () => {
+    const hudWindow = getHudWindow();
+    if (hudWindow) {
+      if (hudWindow.isVisible()) {
+        hudWindow.hide();
+      } else {
+        hudWindow.show();
+      }
+    } else {
+      const newHudWindow = createHudWindow();
+      newHudWindow.show();
+    }
+  });
+
   ipcMainOn("openExternalLink", (url) => {
     shell.openExternal(url);
   });
 
   ipcMainOn("openHudsDirectory", () => {
     openHudsDirectory();
+  });
+
+  // HUD display management  
+  ipcMainHandle("getDisplays", () => {
+    return getAvailableDisplays();
+  });
+
+  ipcMainOn("moveHudToDisplay", (displayIndex: number) => {
+    moveHudToDisplay(displayIndex);
+  });
+
+  ipcMainHandle("getHudStatus", () => {
+    return getHudStatus();
   });
 }

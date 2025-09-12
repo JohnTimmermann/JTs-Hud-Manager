@@ -3,8 +3,13 @@ interface Window {
     startServer: (callback: (message: string) => void) => void;
     sendFrameAction: (payload: FrameWindowAction) => void;
     startOverlay: () => void;
+    closeOverlay: () => void;
+    toggleOverlay: () => void;
     openExternalLink: (url: string) => void;
     openHudsDirectory: () => void;
+    getDisplays: () => Promise<DisplayInfo[]>;
+    moveHudToDisplay: (displayIndex: number) => void;
+    getHudStatus: () => Promise<string>;
   };
   update: {
     updateMessage: (callback: (message: string) => void) => void;
@@ -22,12 +27,17 @@ interface Window {
 
 type EventPayloadMapping = {
   startServer: string;
-  startOverlay;
+  startOverlay: void;
+  closeOverlay: void;
+  toggleOverlay: void;
   sendFrameAction: FrameWindowAction;
   openExternalLink: string;
   getPlayers: Promise<Player[]>;
   updateMessage: string;
   openHudsDirectory: void;
+  getDisplays: DisplayInfo[];
+  moveHudToDisplay: number;
+  getHudStatus: string;
 };
 
 type FrameWindowAction =
@@ -209,3 +219,15 @@ type Knife =
   | "knife_ursus" //
   | "knife_widowmaker" //
   | "knife_canis"; //
+
+interface DisplayInfo {
+  id: number;
+  label: string;
+  bounds: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+  primary: boolean;
+}

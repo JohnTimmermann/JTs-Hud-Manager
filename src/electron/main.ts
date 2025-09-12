@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, globalShortcut } from "electron";
 import {
   checkDirectories,
   isDev,
@@ -9,6 +9,7 @@ import {
 import { shutDown, startServer } from "./server/server.js";
 import { createTray } from "./tray.js";
 import { createMenu } from "./menu.js";
+import { getHudWindow, closeHudWindow } from "./hudWindow.js";
 import http from "http";
 import { ipcMainEvents } from "./ipcEvents/index.js";
 
@@ -23,6 +24,12 @@ app.on("ready", () => {
   createMenu(mainWindow);
   handleCloseEvents(mainWindow);
   ipcMainEvents(mainWindow);
+  registerGlobalHudShortcuts();
+});
+
+app.on("will-quit", () => {
+  // Unregister all global shortcuts
+  globalShortcut.unregisterAll();
 });
 
 function createMainWindow() {
@@ -71,4 +78,47 @@ function handleCloseEvents(mainWindow: BrowserWindow) {
   mainWindow.on("show", () => {
     willClose = false;
   });
+}
+
+function registerGlobalHudShortcuts() {
+  // Register global shortcuts for HUD control
+  try {
+    // Ctrl+Alt+H: Focus HUD (makes it interactive)
+    globalShortcut.register('CommandOrControl+Alt+H', () => {
+      const hudWindow = getHudWindow();
+      if (hudWindow) {
+        hudWindow.setIgnoreMouseEvents(false);
+        hudWindow.setFocusable(true);
+        hudWindow.focus();
+        hudWindow.webContents.executeJavaScript(`
+          console.log('HUD is now interactive - use Ctrl+Shift+C to close, Escape to return to click-through');
+        `);
+      }
+    });
+
+    // Ctrl+Alt+C: Close HUD
+    globalShortcut.register('CommandOrControl+Alt+C', () => {
+      closeHudWindow();
+    });
+
+    // Ctrl+Alt+X: Toggle HUD visibility
+    globalShortcut.register('CommandOrControl+Alt+X', () => {
+      const hudWindow = getHudWindow();
+      if (hudWindow) {
+        if (hudWindow.isVisible()) {
+          hudWindow.hide();
+        } else {
+          hudWindow.show();
+        }
+      }
+    });
+
+    console.log('Global HUD shortcuts registered:');
+    console.log('- Ctrl+Alt+H: Focus HUD (make interactive)');
+    console.log('- Ctrl+Alt+C: Close HUD');  
+    console.log('- Ctrl+Alt+X: Toggle HUD visibility');
+    
+  } catch (error) {
+    console.error('Failed to register global shortcuts:', error);
+  }
 }

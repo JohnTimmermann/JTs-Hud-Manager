@@ -7,8 +7,8 @@ interface TopBarProps {
   header: string;
   buttonText?: string;
   openForm?: (open: boolean) => void;
-  layout: "card" | "table";
-  setLayout: (layout: "card" | "table") => void;
+  layout?: "card" | "table";
+  setLayout?: (layout: "card" | "table") => void;
 }
 
 export const Topbar = ({
@@ -52,12 +52,12 @@ export const Topbar = ({
           {location.pathname === "/players" &&
             (layout == "card" ? (
               <MdOutlineTableRows
-                onClick={() => setLayout("table")}
+                onClick={() => setLayout?.("table")}
                 className="flex size-12 cursor-pointer items-center justify-center self-end rounded-lg p-2 hover:bg-background-light"
               />
             ) : (
               <MdOutlineRememberMe
-                onClick={() => setLayout("card")}
+                onClick={() => setLayout?.("card")}
                 className="flex size-12 cursor-pointer items-center justify-center self-end rounded-lg p-2 hover:bg-background-light"
               />
             ))}
