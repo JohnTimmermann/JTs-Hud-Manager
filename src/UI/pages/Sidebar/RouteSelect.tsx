@@ -5,6 +5,7 @@ import {
   MdGroups,
   MdDashboard,
   MdAddCircle,
+  MdDesktopWindows,
   MdPlayArrow,
 } from "react-icons/md";
 import { useDrawer } from "../../hooks";
@@ -22,6 +23,7 @@ const routes: RouteProps[] = [
   { Icon: MdOutlinePerson, title: "Players", to: "players" },
   { Icon: MdGroups, title: "Teams", to: "teams" },
   { Icon: MdDashboard, title: "Dashboard", to: "dashboard" },
+  { Icon: MdDesktopWindows, title: "HUD Overlay", to: "hud" },
 ];
 
 export const RouteSelect = () => {
@@ -38,7 +40,7 @@ export const RouteSelect = () => {
             onClick={() => window.electron.startOverlay()}
           >
             <MdPlayArrow className="absolute left-3.5 size-7" />
-            {isOpen && <p className="pl-14 font-semibold">Overlay</p>}
+            {isOpen && <p className="pl-14 font-semibold">Start Overlay</p>}
           </button>
         </div>
       </div>
