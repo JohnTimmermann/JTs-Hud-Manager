@@ -24,6 +24,19 @@ export function ipcMainHandle<Key extends keyof EventPayloadMapping>(
     return handler();
   });
 }
+
+export function ipcMainHandleWithParam<Key extends keyof EventPayloadMapping, T>(
+  key: Key,
+  handler: (param: T) => EventPayloadMapping[Key],
+) {
+  ipcMain.handle(key, (event, param: T) => {
+    // Verify the url the user is accessing the fil from
+    if (event.senderFrame) {
+      validateEventFrame(event.senderFrame);
+    }
+    return handler(param);
+  });
+}
 export function ipcMainOn<Key extends keyof EventPayloadMapping>(
   key: Key,
   handler: (payload: EventPayloadMapping[Key]) => void,

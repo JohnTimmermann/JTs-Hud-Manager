@@ -1,10 +1,19 @@
 import { BrowserWindow, shell } from "electron";
 import {
   ipcMainHandle,
+  ipcMainHandleWithParam,
   ipcMainOn,
   openHudsDirectory,
 } from "../helpers/index.js";
-import { createHudWindow } from "../hudWindow.js";
+import { 
+  createHudWindow, 
+  toggleHudVisibility, 
+  moveHudToDisplay, 
+  toggleInteractiveMode, 
+  getHudStatus, 
+  getAllDisplays,
+  forceCloseHud
+} from "../hudWindow.js";
 import * as PlayersModel from "../api/v2/players/players.data.js";
 // Handle expects a response
 export function ipcMainEvents(mainWindow: BrowserWindow) {
@@ -33,9 +42,8 @@ export function ipcMainEvents(mainWindow: BrowserWindow) {
     }
   });
 
-  ipcMainOn("startOverlay", () => {
-    const hudWindow = createHudWindow();
-    hudWindow.show();
+  ipcMainOn("startOverlay", (displayId?: number) => {
+    createHudWindow(displayId);
   });
 
   ipcMainOn("openExternalLink", (url) => {
@@ -44,5 +52,30 @@ export function ipcMainEvents(mainWindow: BrowserWindow) {
 
   ipcMainOn("openHudsDirectory", () => {
     openHudsDirectory();
+  });
+
+  // HUD Management Events
+  ipcMainHandle("getHudStatus", () => {
+    return getHudStatus();
+  });
+
+  ipcMainHandle("getAllDisplays", () => {
+    return getAllDisplays();
+  });
+
+  ipcMainHandle("toggleHudVisibility", () => {
+    return toggleHudVisibility();
+  });
+
+  ipcMainHandleWithParam("moveHudToDisplay", (displayId: number) => {
+    return moveHudToDisplay(displayId);
+  });
+
+  ipcMainHandle("toggleInteractiveMode", () => {
+    return toggleInteractiveMode();
+  });
+
+  ipcMainHandle("forceCloseHud", () => {
+    return forceCloseHud();
   });
 }

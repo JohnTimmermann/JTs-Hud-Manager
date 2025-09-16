@@ -84,4 +84,17 @@ export const database = new sqlite3.Database(getDatabasePath(), (error) => {
       }
     },
   );
+
+  /* Create hud_config table */
+  database.run(
+    `CREATE TABLE IF NOT EXISTS hud_config (
+        id INTEGER PRIMARY KEY CHECK (id = 1),
+        selected_hud TEXT
+      )`,
+    (error) => {
+      if (error) {
+        console.error("Error creating hud_config table:", error.message);
+      }
+    },
+  );
 });

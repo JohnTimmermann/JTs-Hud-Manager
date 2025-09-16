@@ -1,8 +1,10 @@
 import { Request, Response } from "express";
-import { CSGOGSI, CSGORaw, CSGO, Score, RoundOutcome } from "csgogsi";
+import { maybeRecordGSIPacket } from "./testGSI.js";
+import { CSGOGSI, CSGORaw, Score } from "csgogsi";
 import { io } from "../sockets/sockets.js";
 import { selectAllSteamids } from "../coaches/coaches.data.js";
 import { selectCurrent, update } from "../matches/matches.data.js";
+import { gsiStatusMonitor } from "./gsiStatus.js";
 
 export const GSI = new CSGOGSI();
 // let last: CSGO;
@@ -12,6 +14,11 @@ GSI.overtimeMR = 3;
 
 export const readGameData = async (req: Request, res: Response) => {
   const data: CSGORaw = req.body;
+
+  // Record packet for GSI status monitoring
+  gsiStatusMonitor.recordPacket();
+  maybeRecordGSIPacket(data);
+
   const coaches = await selectAllSteamids();
   fixGSIData(data, coaches);
   GSI.digest(data);
@@ -62,8 +69,8 @@ GSI.on("intermissionEnd", async () => {
   if (regulationHalftime) {
     shouldSwitch = true;
   } else if (total > regulationEndTotal) {
-    const otRoundsPlayed = total - regulationEndTotal; 
-    const otBlock = GSI.overtimeMR * 2; 
+    const otRoundsPlayed = total - regulationEndTotal;
+    const otBlock = GSI.overtimeMR * 2;
     if (otRoundsPlayed % otBlock === GSI.overtimeMR) {
       shouldSwitch = true;
     }

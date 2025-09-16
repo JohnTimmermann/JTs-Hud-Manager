@@ -5,3 +5,7 @@ export * from "./Dialog";
 export * from "./Drawer";
 export * from "./Searchbar";
 export * from "./Loading";
+export * from "./GSIStatus";
+
+export * from "./RecordGSIButton";
+export * from "./DemoPlayback";

@@ -3,6 +3,7 @@ import cors from "cors";
 import { createServer } from "http";
 import { APIRouter } from "./api/v2/api.router.js";
 import { initializeWebSocket } from "./api/v2/sockets/sockets.js";
+import { initHudWatcher } from "./api/v2/hudconfig/hudconfig.controller.js";
 import { DevRouter } from "./configs/dev.js";
 import { checkDirectories } from "./api/v2/helpers/utilities.js";
 
@@ -12,21 +13,36 @@ export const server = createServer(expressApp);
 
 export const apiUrl = `localhost:${PORT}/api`;
 
-export const startServer = () => {
-  /* Initialize express app, http server, and websocket server with default or environment port*/
-  initializeWebSocket(server);
+export let isDevMode = false;
+export function setDevMode(enabled: boolean) {
+  isDevMode = enabled;
+  console.log(`Dev mode ${enabled ? 'enabled' : 'disabled'}`);
+}
 
+export const startServer = () => {
+  initializeWebSocket(server);
+  initHudWatcher();
   checkDirectories();
 
-  /* Implement CORs and json to the express app */
   expressApp.use(cors());
   expressApp.use(express.json());
+  expressApp.use((req, res, next) => {
+    if (isDevMode && (req.path === '/api/hud' || req.path.startsWith('/api/hud/') || req.path === '/hud' || req.path.startsWith('/hud/'))) {
+      let targetPath = req.path;
+      if (req.path.startsWith('/api/hud')) {
+        targetPath = req.path.replace('/api/hud', '');
+        if (!targetPath) targetPath = '/';
+      }
 
-  /* Specify routes */
+      const queryString = req.url.includes('?') ? '?' + req.url.split('?')[1] : '';
+      const devUrl = `http://localhost:3500${targetPath}${queryString}`;
+      return res.redirect(devUrl);
+    }
+    next();
+  });
+
   expressApp.use("/api", APIRouter);
   expressApp.use("/development", DevRouter);
-
-  /* Print express server successfully started and listening on specified port */
   server.listen(PORT, () => {
     console.log(`Server listening on port: ${PORT}`);
   });

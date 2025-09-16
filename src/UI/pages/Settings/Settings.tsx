@@ -94,21 +94,6 @@ export const Settings = ({ onClose }: SettingsProps) => {
           </div>
         </div>
 
-        <div className="rounded-lg bg-background-secondary p-6 shadow-md">
-          <h2 className="mb-4 text-xl font-semibold">
-            File Status (Not yet working)
-          </h2>
-          <p className="text-text-secondary">
-            Check if the required files are installed:
-          </p>
-          <ul className="mt-2 list-inside list-disc"></ul>
-          <button
-            disabled
-            className="mt-4 rounded-lg bg-gray-700 px-4 py-2 text-text-disabled"
-          >
-            Install Files
-          </button>
-        </div>
       </div>
 
       <div className="inline-flex w-full justify-end gap-2 border-t border-border p-2">

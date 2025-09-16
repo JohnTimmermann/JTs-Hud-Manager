@@ -2,9 +2,15 @@ interface Window {
   electron: {
     startServer: (callback: (message: string) => void) => void;
     sendFrameAction: (payload: FrameWindowAction) => void;
-    startOverlay: () => void;
+    startOverlay: (displayId?: number) => void;
     openExternalLink: (url: string) => void;
     openHudsDirectory: () => void;
+    getHudStatus: () => Promise<HudStatus>;
+    getAllDisplays: () => Promise<DisplayInfo[]>;
+    toggleHudVisibility: () => Promise<boolean>;
+    moveHudToDisplay: (displayId: number) => Promise<boolean>;
+    toggleInteractiveMode: () => Promise<boolean>;
+    forceCloseHud: () => Promise<boolean>;
   };
   update: {
     updateMessage: (callback: (message: string) => void) => void;
@@ -22,12 +28,18 @@ interface Window {
 
 type EventPayloadMapping = {
   startServer: string;
-  startOverlay;
+  startOverlay: number | undefined;
   sendFrameAction: FrameWindowAction;
   openExternalLink: string;
   getPlayers: Promise<Player[]>;
   updateMessage: string;
   openHudsDirectory: void;
+  getHudStatus: HudStatus;
+  getAllDisplays: DisplayInfo[];
+  toggleHudVisibility: boolean;
+  moveHudToDisplay: boolean;
+  toggleInteractiveMode: boolean;
+  forceCloseHud: boolean;
 };
 
 type FrameWindowAction =
@@ -211,3 +223,22 @@ type Knife =
   | "knife_ursus" //
   | "knife_widowmaker" //
   | "knife_canis"; //
+
+interface HudStatus {
+  isVisible: boolean;
+  isMinimized: boolean;
+  currentDisplay: number;
+  interactiveMode: boolean;
+}
+
+interface DisplayInfo {
+  id: number;
+  label: string;
+  bounds: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+  primary: boolean;
+}

@@ -16,15 +16,22 @@ electron.contextBridge.exposeInMainWorld("electron", {
     ipcSend("sendFrameAction", payload);
   },
 
-  startOverlay: () => ipcSend("startOverlay", null),
+  startOverlay: (displayId?: number) => ipcSend("startOverlay", displayId),
   openExternalLink: (url) => ipcSend("openExternalLink", url),
   openHudsDirectory: () => ipcSend("openHudsDirectory", undefined),
+  getHudStatus: () => ipcInvoke("getHudStatus"),
+  getAllDisplays: () => ipcInvoke("getAllDisplays"),
+  toggleHudVisibility: () => ipcInvoke("toggleHudVisibility"),
+  moveHudToDisplay: (displayId) => ipcInvoke("moveHudToDisplay", displayId),
+  toggleInteractiveMode: () => ipcInvoke("toggleInteractiveMode"),
+  forceCloseHud: () => ipcInvoke("forceCloseHud"),
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(
   key: Key,
+  ...args: any[]
 ): Promise<EventPayloadMapping[Key]> {
-  return electron.ipcRenderer.invoke(key);
+  return electron.ipcRenderer.invoke(key, ...args);
 }
 
 /* Using callbacks because these functions are async */
