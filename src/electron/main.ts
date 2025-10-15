@@ -9,7 +9,6 @@ import { createTray } from "./tray.js";
 import { createMenu } from "./menu.js";
 import { ipcMainEvents } from "./ipcEvents/index.js";
 import { closeServer, startServer } from "./index.js";
-import { closeAllWindows } from "./hudWindow.js";
 
 let mainWindow: BrowserWindow;
 
@@ -22,7 +21,7 @@ app.on("ready", () => {
   ipcMainEvents(mainWindow);
 
   mainWindow.on("close", () => {
-    closeAllWindows();
+    // closeAllWindows();
     closeServer();
   });
 });
@@ -53,4 +52,3 @@ function createMainWindow() {
 
   return mainWindow;
 }
-

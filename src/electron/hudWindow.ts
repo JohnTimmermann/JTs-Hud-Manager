@@ -1,15 +1,10 @@
 import { BrowserWindow, screen } from "electron";
 import { getPreloadPath } from "./helpers/index.js";
+import { checkDirectories } from "./helpers/util.js";
 import { apiUrl } from "./index.js";
 import { createMenu } from "./menu.js";
 
-const hudWindows: BrowserWindow[] = [];
-
-export const closeAllWindows = () => {
-  [...hudWindows].forEach((window) => {
-    window.close();
-  });
-};
+export let hudWindow: BrowserWindow | null = null;
 
 export interface HudStatus {
   isVisible: boolean;
@@ -22,7 +17,7 @@ const hudStatus: HudStatus = {
   isVisible: false,
   isMinimized: false,
   currentDisplay: 0,
-  interactiveMode: false
+  interactiveMode: false,
 };
 
 export function createHudWindow(displayId?: number) {
@@ -33,8 +28,9 @@ export function createHudWindow(displayId?: number) {
   }
 
   const displays = screen.getAllDisplays();
-  const targetDisplay = displayId !== undefined ? displays[displayId] : displays[0];
-  
+  const targetDisplay =
+    displayId !== undefined ? displays[displayId] : displays[0];
+
   if (!targetDisplay) {
     console.error(`Display ${displayId} not found`);
     return null;
@@ -61,6 +57,7 @@ export function createHudWindow(displayId?: number) {
   });
 
   createMenu(hudWindow);
+  checkDirectories();
 
   // Note: The HUD window is always loaded from localhost to avoid CORS issues with local files.
   hudWindow.loadURL("http://" + apiUrl + "/hud");
@@ -78,13 +75,7 @@ export function createHudWindow(displayId?: number) {
     }, 200);
   });
 
-  hudWindows.push(hudWindow);
-
   hudWindow.on("closed", () => {
-    const index = hudWindows.indexOf(hudWindow as BrowserWindow);
-    if (index > -1) {
-      hudWindows.splice(index, 1);
-    }
     hudWindow = null;
     hudStatus.isVisible = false;
   });
@@ -118,7 +109,7 @@ export function toggleHudVisibility(): boolean {
 
 export function moveHudToDisplay(displayId: number): boolean {
   const displays = screen.getAllDisplays();
-  
+
   if (displayId >= displays.length || displayId < 0) {
     return false;
   }
@@ -128,7 +119,7 @@ export function moveHudToDisplay(displayId: number): boolean {
     hudWindow.destroy();
     hudWindow = null;
   }
-  
+
   createHudWindow(displayId);
   return true;
 }
@@ -140,7 +131,7 @@ export function toggleInteractiveMode(): boolean {
 
   hudStatus.interactiveMode = !hudStatus.interactiveMode;
   hudWindow.setIgnoreMouseEvents(!hudStatus.interactiveMode);
-  
+
   return hudStatus.interactiveMode;
 }
 
@@ -153,7 +144,7 @@ export function getAllDisplays() {
     id: index,
     label: display.label || `Display ${index + 1}`,
     bounds: display.bounds,
-    primary: display.bounds.x === 0 && display.bounds.y === 0
+    primary: display.bounds.x === 0 && display.bounds.y === 0,
   }));
 }
 

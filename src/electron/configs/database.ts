@@ -114,12 +114,12 @@ export const database = new sqlite3.Database(getDatabasePath(), (error) => {
         updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (team) REFERENCES teams(_id) ON DELETE SET NULL
       )`,
-    (error) => {
-      if (error) {
-        console.error("Error creating coaches table:", error.message);
-      }
-    },
-  );
+      (error) => {
+        if (error) {
+          console.error("Error creating coaches table:", error.message);
+        }
+      },
+    );
 
     database.run(`
     CREATE TRIGGER IF NOT EXISTS update_coaches_updatedAt
@@ -129,23 +129,16 @@ export const database = new sqlite3.Database(getDatabasePath(), (error) => {
         UPDATE coaches SET updatedAt = CURRENT_TIMESTAMP WHERE steamid = OLD.steamid;
     END;
   `);
-    
-    
-      /* Create hud_config table */
-  database.run(
-    `CREATE TABLE IF NOT EXISTS hud_config (
+
+    /* Create hud_config table */
+    database.run(
+      `CREATE TABLE IF NOT EXISTS hud_config (
         id INTEGER PRIMARY KEY CHECK (id = 1),
         selected_hud TEXT
       )`,
-    (error) => {
-      if (error) {
-        console.error("Error creating hud_config table:", error.message);
-      }
-    },
-  );
       (error) => {
         if (error) {
-          console.error("Error creating coaches table:", error.message);
+          console.error("Error creating hud_config table:", error.message);
         }
       },
     );
