@@ -11,38 +11,40 @@ interface PlayersTableProps {
 export const PlayersTable = ({ setOpenState }: PlayersTableProps) => {
   const { filteredPlayers } = usePlayers();
   return (
-    <table className="table-fixed">
-      <thead className="sticky top-16 border-b border-border bg-background-secondary shadow">
-        <tr>
-          <th className="p-4 text-sm" align="left">
-            Avatar
-          </th>
-          <th className="p-4 text-sm" align="center">
-            Username
-          </th>
-          <th className="p-4 text-sm" align="center">
-            Name
-          </th>
-          <th className="p-4 text-sm" align="center">
-            Country
-          </th>
-          <th className="p-4 text-sm" align="center">
-            SteamID
-          </th>
-          <th className="p-4 text-sm" align="center">
-            Team
-          </th>
-          <th className="p-4 text-sm" align="right">
-            Actions
-          </th>
-        </tr>
-      </thead>
-      <tbody className="divide-y divide-border bg-background-secondary">
-        {filteredPlayers.map((player: Player, index) => (
-          <PlayerRow key={index} player={player} setOpenState={setOpenState} />
-        ))}
-      </tbody>
-    </table>
+    <div className="overflow-y-auto relative flex-1 w-full">
+      <table className="table-fixed w-full">
+        <thead className="sticky top-0 border-b border-border bg-background-secondary shadow">
+          <tr>
+            <th className="p-4 text-sm" align="left">
+              Avatar
+            </th>
+            <th className="p-4 text-sm" align="center">
+              Username
+            </th>
+            <th className="p-4 text-sm" align="center">
+              Name
+            </th>
+            <th className="p-4 text-sm" align="center">
+              Country
+            </th>
+            <th className="p-4 text-sm" align="center">
+              SteamID
+            </th>
+            <th className="p-4 text-sm" align="center">
+              Team
+            </th>
+            <th className="p-4 text-sm" align="right">
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-border bg-background-secondary">
+          {filteredPlayers.map((player: Player, index) => (
+            <PlayerRow key={index} player={player} setOpenState={setOpenState} />
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 };
 

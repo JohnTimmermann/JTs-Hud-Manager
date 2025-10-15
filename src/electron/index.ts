@@ -1,17 +1,17 @@
 import express from "express";
 import cors from "cors";
-import { createServer } from "http";
+import { createServer, Server } from "http";
 import { APIRouter } from "./api/v2/api.router.js";
-import { initializeWebSocket } from "./api/v2/sockets/sockets.js";
 import { initHudWatcher } from "./api/v2/hudconfig/hudconfig.controller.js";
+import { initializeWebSocket, io } from "./api/v2/sockets/sockets.js";
 import { DevRouter } from "./configs/dev.js";
 import { checkDirectories } from "./api/v2/helpers/utilities.js";
 
 export const PORT = process.env.PORT || "1349";
 export const expressApp = express();
-export const server = createServer(expressApp);
+export const server: Server = createServer(expressApp);
 
-export const apiUrl = `localhost:${PORT}/api`;
+export const apiUrl = `localhost:${PORT}`;
 
 export let isDevMode = false;
 export function setDevMode(enabled: boolean) {
@@ -47,3 +47,13 @@ export const startServer = () => {
     console.log(`Server listening on port: ${PORT}`);
   });
 };
+
+export const closeServer = () => {
+  if (io) {
+    io.close();
+  }
+  server.close(() => {
+    console.log("Server closed");
+  });
+};
+

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { maps } from "./MatchPage";
 
 interface VetoRowProps {
@@ -18,37 +18,11 @@ export const VetoRow: React.FC<VetoRowProps> = ({
   teams,
   onVetoChange,
 }) => {
-  const [teamID, setTeamID] = useState<string | null>(
-    veto.type === "decider" ? "decider" : veto.teamId || "",
-  );
-  const [leftTeam, setLeftTeam] = useState<Team | undefined>(undefined);
-  const [rightTeam, setRightTeam] = useState<Team | undefined>(undefined);
-  const [type, setType] = useState<"ban" | "pick" | "decider">(
-    veto?.type || "ban",
-  );
-  const [mapName, setMapName] = useState<string | null>(veto?.mapName || null);
-  const [side, setSide] = useState<"CT" | "T" | "NO">(veto.side);
-  const [reverseSide, setReverseSide] = useState<boolean | null>(
-    veto?.reverseSide || false,
-  );
-
-  useEffect(() => {
-    setLeftTeam(teams.find((team) => team._id === leftTeamId));
-    setRightTeam(teams.find((team) => team._id === rightTeamId));
-    setTeamID(veto.teamId);
-    setMapName(veto.mapName);
-    setReverseSide(veto.reverseSide ?? false);
-    setSide(veto.side);
-  }, [veto, teams, leftTeamId, rightTeamId]);
-
-  const handleTeamSelect = (id: string) => {
-    setTeamID(id);
-    onVetoChange(index, "teamId", id);
-  };
+  const leftTeam = teams.find((team) => team._id === leftTeamId);
+  const rightTeam = teams.find((team) => team._id === rightTeamId);
 
   return (
     <tr
-      key={index}
       className="bg-background-secondary odd:bg-background-primary"
     >
       <td className="px-6 py-4">
@@ -57,18 +31,17 @@ export const VetoRow: React.FC<VetoRowProps> = ({
       <td className="px-6 py-4">
         <form className="flex w-full flex-col">
           <div className="flex w-full flex-col justify-center space-y-1">
-            {["ban", "pick", "decider"].map((option) => (
+            {["pick", "ban", "decider"].map((option) => (
               <label key={option} className="flex items-center space-x-2">
                 <input
                   type="radio"
                   value={option}
-                  checked={type === option}
+                  checked={veto.type === option}
                   onChange={(e) => {
                     const newType = e.target.value as
-                      | "ban"
                       | "pick"
+                      | "ban"
                       | "decider";
-                    setType(newType);
                     onVetoChange(index, "type", newType);
                   }}
                   name="Type"
@@ -83,15 +56,17 @@ export const VetoRow: React.FC<VetoRowProps> = ({
       <td className="px-6 py-4">
         <div className="w-full">
           <select
-            disabled={type === "decider"}
-            value={type === "decider" ? "decider" : teamID || ""}
-            onChange={(e) => handleTeamSelect(e.target.value)}
-            name={type === "decider" ? "Decider" : "Team"}
+            disabled={veto.type === "decider"}
+            value={veto.type === "decider" ? "decider" : veto.teamId || ""}
+            onChange={(e) => onVetoChange(index, "teamId", e.target.value)}
+            name={veto.type === "decider" ? "Decider" : "Team"}
           >
             <option value="" disabled>
               Team
             </option>
-            {type === "decider" && <option value="decider">Decider</option>}
+            {veto.type === "decider" && (
+              <option value="decider">Decider</option>
+            )}
             {leftTeamId && leftTeam && (
               <option value={leftTeamId}>{leftTeam.name}</option>
             )}
@@ -104,11 +79,9 @@ export const VetoRow: React.FC<VetoRowProps> = ({
       <td className="px-6 py-4">
         <div className="w-full">
           <select
-            value={mapName || ""}
+            value={veto.mapName || ""}
             onChange={(e) => {
-              const newMapName = e.target.value;
-              setMapName(newMapName);
-              onVetoChange(index, "mapName", newMapName);
+              onVetoChange(index, "mapName", e.target.value);
             }}
             name="Map"
           >
@@ -126,10 +99,9 @@ export const VetoRow: React.FC<VetoRowProps> = ({
       <td className="px-6 py-4">
         <div className="w-full">
           <select
-            value={side}
+            value={veto.side}
             onChange={(e) => {
               const newSide = e.target.value as "CT" | "T" | "NO";
-              setSide(newSide);
               onVetoChange(index, "side", newSide);
             }}
             name="Side"
@@ -145,12 +117,8 @@ export const VetoRow: React.FC<VetoRowProps> = ({
           <input
             type="checkbox"
             id={`reverseSide-${index}`}
-            checked={reverseSide === true}
-            onChange={(e) => {
-              const newReverseSide = e.target.checked;
-              setReverseSide(newReverseSide);
-              onVetoChange(index, "reverseSide", newReverseSide);
-            }}
+            checked={veto.reverseSide === true}
+            onChange={(e) => onVetoChange(index, "reverseSide", e.target.checked)}
           />
         </div>
       </td>

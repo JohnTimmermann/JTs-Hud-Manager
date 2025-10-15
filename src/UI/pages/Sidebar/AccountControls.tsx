@@ -13,7 +13,7 @@ export const AccountToggle = () => {
   return (
     <>
       <Dialog open={open} onClose={() => setOpen(false)}>
-        <Settings onClose={() => setOpen(false)} />
+        <Settings/>
       </Dialog>
       <div className="relative flex flex-col gap-2 pb-5 text-text-secondary">
         <button

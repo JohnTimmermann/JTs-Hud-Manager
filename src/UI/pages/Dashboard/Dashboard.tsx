@@ -33,7 +33,7 @@ export const Dashboard = () => {
             <PlayersTile playersFromGame={gameData.players} copyToClipboard={copyToClipboard} />
           </div>
         ) : (
-          <h3>Not connected to a server/demo</h3>
+          <h3>Not connected in a spectator slot/demo</h3>
         )}
         {copyStatus && (
           <div className={`p-4 fixed top-8 left-1/2 -translate-x-1/2 z-50 ${copyStatus ? "bg-green-900 text-green-500 border-green-500" : "bg-red-900 text-red-500 border-red-500"} rounded-lg`}>

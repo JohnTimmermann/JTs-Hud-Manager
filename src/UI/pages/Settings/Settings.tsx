@@ -1,50 +1,6 @@
-import { useEffect, useState } from "react";
 import { ButtonContained } from "../../components";
-import axios from "axios";
-import { apiUrl } from "../../api/api";
 
-interface SettingsProps {
-  onClose: () => void;
-}
-
-export const Settings = ({ onClose }: SettingsProps) => {
-  const [autoSwitch, setAutoSwitch] = useState(true);
-  const [layout, setLayout] = useState("vertical");
-  const [errorMessage, setErrorMessage] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    getSettings();
-  }, []);
-
-  const getSettings = async () => {
-    try {
-      const response = await axios.get(`${apiUrl}/settings`);
-      if (response.data) {
-        setAutoSwitch(response.data.autoSwitch);
-        setLayout(response.data.layout);
-      }
-    } catch (error) {
-      console.error("Error fetching settings:", error);
-    }
-  };
-
-  const saveSettings = async () => {
-    setIsSubmitting(true);
-    try {
-      await axios.put(`${apiUrl}/settings`, { autoSwitch, layout });
-      setIsSubmitting(false);
-    } catch (error) {
-      setErrorMessage("Error saving settings: " + error);
-      setIsSubmitting(false);
-    }
-    setIsSubmitting(false);
-    onClose();
-  };
-
-  const handleToggle = () => {
-    setAutoSwitch(!autoSwitch);
-  };
+export const Settings = () => {
 
   return (
     <div className="flex flex-col gap-6 overflow-y-auto">

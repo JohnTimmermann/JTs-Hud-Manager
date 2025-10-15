@@ -20,12 +20,9 @@
     "transpile:electron": "tsc --project src/electron/tsconfig.json",
     "dist:mac": "npm run transpile:electron && npm run build && electron-builder --mac --arm64",
     "dist:win": "npm run transpile:electron && npm run build && electron-builder --win --x64",
-    "dist:linux": "npm run transpile:electron && npm run build && electron-builder --linux --x64",
-    "test:e2e": "playwright test",
-    "test:unit": "vitest src"
+    "dist:linux": "npm run transpile:electron && npm run build && electron-builder --linux --x64"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.47.11",
     "adm-zip": "^0.5.16",
     "axios": "^1.7.9",
     "cors": "^2.8.5",
@@ -44,13 +41,12 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",
-    "@playwright/test": "^1.49.1",
     "@tailwindcss/forms": "^0.5.9",
     "@types/adm-zip": "^0.5.7",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/multer": "^1.4.12",
-    "@types/node": "^22.10.2",
+    "@types/node": "^22.18.10",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@types/react-router-dom": "^5.3.3",

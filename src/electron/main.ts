@@ -8,7 +8,8 @@ import {
 import { createTray } from "./tray.js";
 import { createMenu } from "./menu.js";
 import { ipcMainEvents } from "./ipcEvents/index.js";
-import { startServer } from "./index.js";
+import { closeServer, startServer } from "./index.js";
+import { closeAllWindows } from "./hudWindow.js";
 
 let mainWindow: BrowserWindow;
 
@@ -18,8 +19,18 @@ app.on("ready", () => {
   checkDirectories();
   startServer();
   createTray();
-  createMenu(mainWindow);
   ipcMainEvents(mainWindow);
+
+  mainWindow.on("close", () => {
+    closeAllWindows();
+    closeServer();
+  });
+});
+
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") {
+    app.quit();
+  }
 });
 
 function createMainWindow() {
@@ -42,3 +53,4 @@ function createMainWindow() {
 
   return mainWindow;
 }
+

@@ -1,5 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { apiUrl } from "../api/api";
+import React, { createContext, useContext, useState } from "react";
 
 type Theme = "light" | "dark";
 
@@ -16,24 +15,24 @@ export const ThemesProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [theme, setTheme] = useState<Theme>("dark");
 
-  const getTheme = async () => {
-    try {
-      const response = await fetch(`${apiUrl}/settings`);
-      const data = await response.json();
-      if (data) {
-        setTheme("dark");
-      } else {
-        setTheme("dark");
-      }
-    } catch (error) {
-      console.error("Error fetching theme:", error);
-      setTheme("dark");
-    }
-  };
+  // const getTheme = async () => {
+  //   try {
+  //     const response = await fetch(`${apiUrl}/settings`);
+  //     const data = await response.json();
+  //     if (data) {
+  //       setTheme("dark");
+  //     } else {
+  //       setTheme("dark");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching theme:", error);
+  //     setTheme("dark");
+  //   }
+  // };
 
-  useEffect(() => {
-    getTheme();
-  }, []);
+  // useEffect(() => {
+  //   getTheme();
+  // }, []);
 
   const toggleTheme = () => {
     setTheme((prevTheme) => {

@@ -10,36 +10,38 @@ interface TeamsTableProps {
 export const TeamsTable = ({ setOpenState }: TeamsTableProps) => {
   const { filteredTeams} = useTeams();
   return (
-    <table className="table-fixed">
-      <thead className="sticky top-16 border-b border-border bg-background-secondary shadow">
-        <tr>
-          <th className="p-4 text-sm" align="left">
-            Logo
-          </th>
-          <th className="p-4 text-sm" align="center">
-            Name
-          </th>
-          <th className="p-4 text-sm" align="center">
-            Short Name
-          </th>
-          <th className="p-4 text-sm" align="center">
-            Country
-          </th>
-          <th className="p-4 text-sm" align="right">
-            Actions
-          </th>
-        </tr>
-      </thead>
-      <tbody className="divide-y divide-border bg-background-secondary">
-        {filteredTeams.map((team: Team, index) => (
-          <TeamRow
-            key={index}
-            team={team}
-            setOpenState={setOpenState}
-          />
-        ))}
-      </tbody>
-    </table>
+    <div className="overflow-y-auto relative flex-1 w-full">
+      <table className="table-fixed w-full">
+        <thead className="sticky top-0 border-b border-border bg-background-secondary shadow">
+          <tr>
+            <th className="p-4 text-sm" align="left">
+              Logo
+            </th>
+            <th className="p-4 text-sm" align="center">
+              Name
+            </th>
+            <th className="p-4 text-sm" align="center">
+              Short Name
+            </th>
+            <th className="p-4 text-sm" align="center">
+              Country
+            </th>
+            <th className="p-4 text-sm" align="right">
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-border bg-background-secondary">
+          {filteredTeams.map((team: Team, index) => (
+            <TeamRow
+              key={index}
+              team={team}
+              setOpenState={setOpenState}
+            />
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 };
 

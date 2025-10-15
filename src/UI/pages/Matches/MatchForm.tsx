@@ -128,7 +128,7 @@ export const MatchForm = ({ open, setOpen }: MatchFormProps) => {
     setRightTeamWins(0);
     setErrorMessage("");
     const newVetos: Veto[] = vetos.map(() => ({
-      type: "ban",
+      type: "pick",
       teamId: "",
       mapName: "",
       side: "NO",

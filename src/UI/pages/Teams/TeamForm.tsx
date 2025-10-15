@@ -27,7 +27,8 @@ export const TeamsForm = ({ open, setOpen }: TeamsFormProps) => {
   const [teamName, setTeamName] = useState("");
   const [shortName, setShortName] = useState("");
   const [country, setCountry] = useState("");
-  const [logo, setLogo] = useState<File | null>(null);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logo, setLogo] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [teamNameError, setTeamNameError] = useState("");
   const [logoError, setLogoError] = useState("");
@@ -38,6 +39,7 @@ export const TeamsForm = ({ open, setOpen }: TeamsFormProps) => {
       setTeamName(selectedTeam.name || "");
       setShortName(selectedTeam.shortName || "");
       setCountry(selectedTeam.country || "");
+      setLogo(selectedTeam.logo || "");
     } else {
       handleReset();
     }
@@ -66,7 +68,9 @@ export const TeamsForm = ({ open, setOpen }: TeamsFormProps) => {
     formData.append("name", teamName);
     formData.append("shortName", shortName);
     formData.append("country", country);
-    if (logo) {
+    if (logoFile) {
+      formData.append("logo", logoFile);
+    } else if (selectedTeam?.logo) {
       formData.append("logo", logo);
     }
 
@@ -95,7 +99,8 @@ export const TeamsForm = ({ open, setOpen }: TeamsFormProps) => {
     setTeamName("");
     setShortName("");
     setCountry("");
-    setLogo(null);
+    setLogoFile(null);
+    setLogo("");
     setTeamNameError("");
     setLogoError("");
   };
@@ -149,7 +154,7 @@ export const TeamsForm = ({ open, setOpen }: TeamsFormProps) => {
               type="file"
               id="logo"
               accept="image/*"
-              onChange={(e) => setLogo(e.target.files?.[0] || null)}
+              onChange={(e) => setLogoFile(e.target.files?.[0] || null)}
               className="hidden"
             />
             <button
@@ -159,8 +164,8 @@ export const TeamsForm = ({ open, setOpen }: TeamsFormProps) => {
             >
               Upload Logo
             </button>
-            {logo && (
-              <span className="text-sm text-text-secondary">{logo.name}</span>
+            {logoFile && (
+              <span className="text-sm text-text-secondary">{logoFile.name}</span>
             )}
             {logoError && (
               <p className="pt-2 text-sm text-red-500">{logoError}</p>

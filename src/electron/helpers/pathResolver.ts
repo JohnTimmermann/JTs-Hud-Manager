@@ -19,7 +19,7 @@ export function getPreloadPath() {
 
 // Path to our database file (stored in appdata for openhud)
 export function getDatabasePath() {
-  return path.join(app.getPath("userData"), "database.db");
+  return path.join(app.getPath("userData"), "database.v1.db");
 }
 
 // Needed for verifying URL
@@ -41,7 +41,7 @@ export function getDefaultHUDPath() {
   return path.join(
     app.getAppPath(),
     isDev() ? "." : "..",
-    "/src/assets/defaultHud",
+    "/src/assets/defaultHudv2",
   );
 }
 
