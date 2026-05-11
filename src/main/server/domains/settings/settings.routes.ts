@@ -7,12 +7,18 @@ export interface AppSettings {
   autoSwitchSides: boolean;
   telnetHost: string;
   telnetPort: number;
+  vmixHost: string;
+  vmixPort: number;
+  vmixMappings: string;
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
   autoSwitchSides: true,
   telnetHost: '127.0.0.1',
   telnetPort: 2020,
+  vmixHost: '127.0.0.1',
+  vmixPort: 8088,
+  vmixMappings: '[]',
 };
 
 // Load all settings from the DB and return as a typed object
@@ -23,6 +29,9 @@ export const getSettings = async (): Promise<AppSettings> => {
     autoSwitchSides: map.autoSwitchSides !== undefined ? map.autoSwitchSides === 'true' : DEFAULT_SETTINGS.autoSwitchSides,
     telnetHost: map.telnetHost ?? DEFAULT_SETTINGS.telnetHost,
     telnetPort: map.telnetPort !== undefined ? Number(map.telnetPort) : DEFAULT_SETTINGS.telnetPort,
+    vmixHost: map.vmixHost ?? DEFAULT_SETTINGS.vmixHost,
+    vmixPort: map.vmixPort !== undefined ? Number(map.vmixPort) : DEFAULT_SETTINGS.vmixPort,
+    vmixMappings: map.vmixMappings ?? DEFAULT_SETTINGS.vmixMappings,
   };
 };
 

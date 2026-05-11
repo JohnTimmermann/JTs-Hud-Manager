@@ -5,6 +5,7 @@ import { MatchService } from '../domains/matches/match.service'
 import { TeamService } from '../domains/teams/team.service'
 import { PlayerRepository } from '../domains/players/player.repository'
 import { getSettings } from '../domains/settings/settings.routes'
+import { vmixService } from './vmix.service'
 import { RoundData } from '../domains/matches/match.types'
 
 const matchService = new MatchService()
@@ -262,6 +263,72 @@ export const setupGSI = (io: Server) => {
         rounds[roundNumber - 1] = roundData
         return { ...v, rounds: rounds.slice(0, roundNumber) }
       })
+
+      // vMix Integration Triggers
+      try {
+        const settings = await getSettings()
+        const graph = JSON.parse(settings.vmixMappings || '{"nodes":[],"edges":[]}')
+
+        if (graph && graph.nodes && graph.edges) {
+          let isAce = false
+          let isClutch = false
+
+          const winnerSide = score.winner.side ? score.winner.side.toUpperCase() : null
+
+          for (const p of GSI.current.players) {
+            if (p.state.round_kills >= 5) isAce = true
+          }
+
+          const eventsToTrigger = new Set(['round_end'])
+          if (isAce) eventsToTrigger.add('ace')
+          if (isClutch) eventsToTrigger.add('clutch')
+
+          const triggerNodes = graph.nodes.filter(
+            (n: any) => n.type === 'trigger' && eventsToTrigger.has(n.data?.event)
+          )
+
+          const executeNode = async (nodeId: string, context: any) => {
+            const node = graph.nodes.find((n: any) => n.id === nodeId)
+            if (!node) return
+
+            let activeHandles: string[] = []
+
+            if (node.type === 'action') {
+              await vmixService
+                .sendVmixCommand(node.data?.function, node.data?.input, node.data?.value)
+                .catch(console.error)
+              activeHandles.push('default')
+            } else if (node.type === 'condition') {
+              activeHandles.push(context.winnerSide === 'CT' ? 'CT' : 'T')
+            } else if (node.type === 'delay') {
+              await new Promise((res) => setTimeout(res, node.data?.delayMs || 0))
+              activeHandles.push('default')
+            } else if (node.type === 'trigger') {
+              activeHandles.push('default')
+            }
+
+            for (const handle of activeHandles) {
+              const targetHandleMatch =
+                handle === 'default'
+                  ? (e: any) => !e.sourceHandle || e.sourceHandle === 'default'
+                  : (e: any) => e.sourceHandle === handle
+              const outgoingEdges = graph.edges.filter(
+                (e: any) => e.source === nodeId && targetHandleMatch(e)
+              )
+
+              for (const edge of outgoingEdges) {
+                executeNode(edge.target, context)
+              }
+            }
+          }
+
+          for (const tNode of triggerNodes) {
+            executeNode(tNode.id, { winnerSide })
+          }
+        }
+      } catch (err) {
+        console.error('[vMix] Error executing node graph:', err)
+      }
 
       await matchService.updateMatch(match.id, { vetos: updatedVetos })
       io.emit('match')
