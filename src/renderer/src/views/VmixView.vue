@@ -88,7 +88,7 @@ const getInitialDataForType = (type: string) => {
     case 'trigger':
       return { event: 'round_end' }
     case 'condition':
-      return {}
+      return { conditionType: 'winner' }
     case 'delay':
       return { delayMs: 1000 }
     case 'action':

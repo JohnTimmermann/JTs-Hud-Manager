@@ -218,8 +218,34 @@ export const setupGSI = (io: Server) => {
 
         const winnerSide = score.winner.side ? score.winner.side.toUpperCase() : null
 
-        for (const p of GSI.current.players) {
-          if (p.state.round_kills >= 5) isAce = true
+        const getWinType = (outcome: string) => {
+          switch (outcome) {
+            case 'ct_win_defuse':
+              return 'defuse'
+            case 'ct_win_time':
+              return 'time'
+            case 't_win_bomb':
+              return 'bomb'
+            case 'ct_win_elimination':
+            case 't_win_elimination':
+              return 'elimination'
+            default:
+              return 'time'
+          }
+        }
+
+        const roundNumber = score.map.round
+        const roundOutcome = score.map.round_wins?.[roundNumber]
+        const winType = roundOutcome ? getWinType(roundOutcome) : 'elimination'
+        const isMatchPoint =
+          score.map.team_ct.score >= GSI.regulationMR || score.map.team_t.score >= GSI.regulationMR
+
+        const contextPayload = { winnerSide, winType, isMatchPoint }
+
+        if (GSI.current && GSI.current.players) {
+          for (const p of GSI.current.players) {
+            if (p.state.round_kills >= 5) isAce = true
+          }
         }
 
         const eventsToTrigger = new Set(['round_end'])
@@ -242,7 +268,15 @@ export const setupGSI = (io: Server) => {
               .catch(console.error)
             activeHandles.push('default')
           } else if (node.type === 'condition') {
-            activeHandles.push(context.winnerSide === 'CT' ? 'CT' : 'T')
+            const condType = node.data?.conditionType || 'winner'
+
+            if (condType === 'winner') {
+              activeHandles.push(context.winnerSide === 'CT' ? 'CT' : 'T')
+            } else if (condType === 'win_type') {
+              activeHandles.push(context.winType)
+            } else if (condType === 'match_point') {
+              activeHandles.push(context.isMatchPoint ? 'yes' : 'no')
+            }
           } else if (node.type === 'delay') {
             await new Promise((res) => setTimeout(res, node.data?.delayMs || 0))
             activeHandles.push('default')
@@ -266,7 +300,7 @@ export const setupGSI = (io: Server) => {
         }
 
         for (const tNode of triggerNodes) {
-          executeNode(tNode.id, { winnerSide })
+          executeNode(tNode.id, contextPayload)
         }
       }
     } catch (err) {
