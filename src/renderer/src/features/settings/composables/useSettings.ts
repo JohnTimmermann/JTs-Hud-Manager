@@ -3,10 +3,18 @@ import { API_URL } from '../../../index'
 
 export interface AppSettings {
   autoSwitchSides: boolean
+  vmixHost: string
+  vmixPort: number
+  vmixMappings: string
 }
 
 export function useSettings() {
-  const settings = ref<AppSettings>({ autoSwitchSides: true })
+  const settings = ref<AppSettings>({ 
+    autoSwitchSides: true,
+    vmixHost: '127.0.0.1',
+    vmixPort: 8088,
+    vmixMappings: '[]'
+  })
   const isLoading = ref(false)
   const isSaving = ref(false)
 

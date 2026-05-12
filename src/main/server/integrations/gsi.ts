@@ -5,6 +5,7 @@ import { MatchService } from '../domains/matches/match.service'
 import { TeamService } from '../domains/teams/team.service'
 import { PlayerRepository } from '../domains/players/player.repository'
 import { getSettings } from '../domains/settings/settings.routes'
+import { vmixService } from './vmix.service'
 import { RoundData } from '../domains/matches/match.types'
 
 const matchService = new MatchService()
@@ -206,6 +207,106 @@ export const setupGSI = (io: Server) => {
 
   // Round end logic: record per-round player stats and win type into the active veto
   GSI.on('roundEnd', async (score: Score) => {
+    // vMix Integration Triggers
+    try {
+      const settings = await getSettings()
+      const graph = JSON.parse(settings.vmixMappings || '{"nodes":[],"edges":[]}')
+
+      if (graph && graph.nodes && graph.edges) {
+        let isAce = false
+        let isClutch = false
+
+        const winnerSide = score.winner.side ? score.winner.side.toUpperCase() : null
+
+        const getWinType = (outcome: string) => {
+          switch (outcome) {
+            case 'ct_win_defuse':
+              return 'defuse'
+            case 'ct_win_time':
+              return 'time'
+            case 't_win_bomb':
+              return 'bomb'
+            case 'ct_win_elimination':
+            case 't_win_elimination':
+              return 'elimination'
+            default:
+              return 'time'
+          }
+        }
+
+        const roundNumber = score.map.round
+        const roundOutcome = score.map.round_wins?.[roundNumber]
+        const winType = roundOutcome ? getWinType(roundOutcome) : 'elimination'
+        const isMatchPoint =
+          score.map.team_ct.score >= GSI.regulationMR || score.map.team_t.score >= GSI.regulationMR
+
+        const contextPayload = { winnerSide, winType, isMatchPoint }
+
+        if (GSI.current && GSI.current.players) {
+          for (const p of GSI.current.players) {
+            if (p.state.round_kills >= 5) isAce = true
+          }
+        }
+
+        const eventsToTrigger = new Set(['round_end'])
+        if (isAce) eventsToTrigger.add('ace')
+        if (isClutch) eventsToTrigger.add('clutch')
+
+        const triggerNodes = graph.nodes.filter(
+          (n: any) => n.type === 'trigger' && eventsToTrigger.has(n.data?.event)
+        )
+
+        const executeNode = async (nodeId: string, context: any) => {
+          const node = graph.nodes.find((n: any) => n.id === nodeId)
+          if (!node) return
+
+          let activeHandles: string[] = []
+
+          if (node.type === 'action') {
+            await vmixService
+              .sendVmixCommand(node.data?.function, node.data?.input, node.data?.value)
+              .catch(console.error)
+            activeHandles.push('default')
+          } else if (node.type === 'condition') {
+            const condType = node.data?.conditionType || 'winner'
+
+            if (condType === 'winner') {
+              activeHandles.push(context.winnerSide === 'CT' ? 'CT' : 'T')
+            } else if (condType === 'win_type') {
+              activeHandles.push(context.winType)
+            } else if (condType === 'match_point') {
+              activeHandles.push(context.isMatchPoint ? 'yes' : 'no')
+            }
+          } else if (node.type === 'delay') {
+            await new Promise((res) => setTimeout(res, node.data?.delayMs || 0))
+            activeHandles.push('default')
+          } else if (node.type === 'trigger') {
+            activeHandles.push('default')
+          }
+
+          for (const handle of activeHandles) {
+            const targetHandleMatch =
+              handle === 'default'
+                ? (e: any) => !e.sourceHandle || e.sourceHandle === 'default'
+                : (e: any) => e.sourceHandle === handle
+            const outgoingEdges = graph.edges.filter(
+              (e: any) => e.source === nodeId && targetHandleMatch(e)
+            )
+
+            for (const edge of outgoingEdges) {
+              executeNode(edge.target, context)
+            }
+          }
+        }
+
+        for (const tNode of triggerNodes) {
+          executeNode(tNode.id, contextPayload)
+        }
+      }
+    } catch (err) {
+      console.error('[vMix] Error executing node graph:', err)
+    }
+
     try {
       if (!GSI.current) return
 
